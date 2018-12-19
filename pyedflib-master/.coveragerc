@@ -1,0 +1,10 @@
+[run]
+branch = True
+include = 
+    */pyedflib/*
+omit = 
+    */version.py
+    */pyedflib/tests/*
+    *.pyx
+    stringsource
+plugins = Cython.Coverage
