@@ -10,6 +10,7 @@ import mylib
 import pandas as pd
 import mvar
 import numpy as np
+import matplotlib.pyplot as plt
 
 #%% Load data and store into a dataframe
 
@@ -26,7 +27,6 @@ N, n = data.shape
 p = 3
 A_est, sigma = mvar.mvar_fit(data, p)
 sigma = np.diag(sigma)  # DTF + PDC support diagonal noise
-# sigma = None
 
 # compute DTF
 D, freqs = mvar.DTF(A_est, sigma)
@@ -36,9 +36,3 @@ D, freqs = mvar.DTF(A_est, sigma)
 P, freqs = mvar.PDC(A_est, sigma)
 #plot_all(freqs, P, 'PDC') it takes a lot to run this
 
-D = D.max(axis = 0).shape
-P = P.max(axis = 0).shape
-
-import matplotlib.pyplot as plt
-
-plt.hist(freqs)
