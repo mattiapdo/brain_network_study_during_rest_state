@@ -36,3 +36,4 @@ D, freqs = mvar.DTF(A_est, sigma)
 P, freqs = mvar.PDC(A_est, sigma)
 #plot_all(freqs, P, 'PDC') it takes a lot to run this
 
+freqs
