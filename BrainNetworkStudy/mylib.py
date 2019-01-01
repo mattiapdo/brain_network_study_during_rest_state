@@ -76,3 +76,9 @@ def print_some_stuff(f):
         result += ("%.1f, " % buf[i])
         
     print(result)
+    
+    
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]

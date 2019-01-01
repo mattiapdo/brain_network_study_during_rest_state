@@ -7,10 +7,10 @@ Created on Tue Dec 18 23:42:01 2018
 
 import pyedflib
 import mylib 
-import pandas as pd
 import mvar
+import mygraph
 import numpy as np
-import matplotlib.pyplot as plt
+from igraph import Graph
 
 #%% Load data and store into a dataframe
 
@@ -30,10 +30,18 @@ sigma = np.diag(sigma)  # DTF + PDC support diagonal noise
 
 # compute DTF
 D, freqs = mvar.DTF(A_est, sigma)
-#mvar.plot_all(freqs, D, 'DTF') it takes a lot to run this
 
 # compute PDC
 P, freqs = mvar.PDC(A_est, sigma)
-#plot_all(freqs, P, 'PDC') it takes a lot to run this
 
-freqs
+# take take a graph relative to a specific frequency
+
+freq = 0.111328 # this has to be chosen better
+
+D = D[np.where(freqs == mylib.find_nearest(freqs, freq)),:,:].reshape(64, 64)
+
+G = Graph.Weighted_Adjacency(D.tolist())
+
+G = mygraph.applyTreshhold(G, 0.2)
+
+
