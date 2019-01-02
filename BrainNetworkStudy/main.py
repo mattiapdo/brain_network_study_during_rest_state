@@ -12,6 +12,7 @@ import mygraph
 import numpy as np
 import pandas as pd
 from igraph import Graph, GraphBase
+import matplotlib.pyplot as plt
 
 #%% Load data and store into a dataframe
 
@@ -38,7 +39,7 @@ freq = 0.111328 # this has to be chosen better
 D = D[np.where(freqs == mylib.find_nearest(freqs, freq)),:,:].reshape(64, 64)
 G = Graph.Weighted_Adjacency(D.tolist(), mode = 0) # mode 1 is to say we want an indirected graph
 G.vs["names"] = data.columns.values
-G = mygraph.applyTreshhold(G, 0.2)
+G = mygraph.applyTreshold(G, 0.2)
 
 #%%
 
@@ -61,9 +62,9 @@ local_ind = pd.DataFrame.from_dict(      {
         )
 
 local_ind.set_index("channel", inplace = True)
-print("\nTop 10 channels by degree\n", local_ind.sort_values(by = "strenght", ascending = False)[1:10])
-print("\nTop 10 channels by OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10])
-print("\nTop 10 channels by IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10])
+#print("\nTop 10 channels by degree\n", local_ind.sort_values(by = "strenght", ascending = False)[1:10])
+#print("\nTop 10 channels by OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10])
+#print("\nTop 10 channels by IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10])
 
 
 
@@ -77,10 +78,28 @@ local_ind = pd.DataFrame.from_dict(      {
         )
 
 local_ind.set_index("channel", inplace = True)
-print("\nTop 10 channels by generalized degree\n", local_ind.sort_values(by = "strenght", ascending = False)[1:10])
-print("\nTop 10 channels by generalized OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10])
-print("\nTop 10 channels by generalized IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10])
+#print("\nTop 10 channels by generalized degree\n", local_ind.sort_values(by = "strenght", ascending = False)[1:10])
+#print("\nTop 10 channels by generalized OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10])
+#print("\nTop 10 channels by generalized IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10])
 
-
+#%%
 # 2.4 Study the behaviour of global graph indices in function of network density
 
+densities = [i*0.1 for i in range(1,10)] # edit these with the ones provided by the prof
+# these two lines take some seconds...
+clustering_coeffs = [mygraph.applyTreshold(Graph.Weighted_Adjacency(D.tolist(), mode = 0), i).transitivity_avglocal_undirected() for i in densities]
+average_path_lengths = [mygraph.applyTreshold(Graph.Weighted_Adjacency(D.tolist(), mode = 0), i).average_path_length(directed = False, unconn=True) for i in densities]
+
+#%%
+
+# Two subplots, the axes array is 1-d
+f, axarr = plt.subplots(2, sharex=True, figsize = (9,9))
+axarr[0].plot(densities, clustering_coeffs, color = "green")
+axarr[0].set_title('Global Indices vs Graph Density')
+axarr[0].set_xlabel("density")
+axarr[0].set_ylabel("clustering coefficient")
+axarr[0].grid(linestyle = ":")
+axarr[1].plot(densities, average_path_lengths, color = "red")
+axarr[1].set_xlabel("density")
+axarr[1].set_ylabel("average path length")
+axarr[1].grid(linestyle = ":")

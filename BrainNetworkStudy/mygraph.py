@@ -7,7 +7,7 @@ def randargmin(b,**kw):
   """ a random tie-breaking argmax"""
   return np.argmin(np.random.random(b.shape) * (b==b.min()), **kw)
 
-def applyTreshhold(G, threshold = .01):
+def applyTreshold(G, threshold):
     while(G.density() > threshold):
         adj = np.matrix(G.get_adjacency(attribute = "weight")._get_data())
         masked = np.ma.masked_where(adj == 0, adj)
