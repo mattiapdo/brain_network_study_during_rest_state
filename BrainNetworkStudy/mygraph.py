@@ -9,7 +9,7 @@ def randargmin(b,**kw):
 
 def applyTreshhold(G, threshold = .01):
     while(G.density() > threshold):
-        adj = np.matrix(G.get_adjacency()._get_data())
+        adj = np.matrix(G.get_adjacency(attribute = "weight")._get_data())
         masked = np.ma.masked_where(adj == 0, adj)
         G.delete_edges([np.unravel_index(randargmin(masked), masked.shape)])
     return G
