@@ -11,16 +11,18 @@ import mvar
 import mygraph
 import numpy as np
 import pandas as pd
-from igraph import Graph, GraphBase
+from igraph import Graph
 import matplotlib.pyplot as plt
+import re
 
 #%% Load data and store into a dataframe
 
-f = pyedflib.EdfReader('../data/S001R01.edf')
+f = pyedflib.EdfReader('./data/S001R01.edf')
 # mylib.print_some_stuff(f)
 
 data = mylib.edfToDataFrame(f)
 f._close()
+T = 1./f.getSampleFrequencies()[1]
 
 #%%
 # 1.1
@@ -29,16 +31,22 @@ measures = data.T.values
 N, n = measures.shape
 p = 3
 A_est, sigma = mvar.mvar_fit(measures, p)
-sigma = np.diag(sigma)  # DTF + PDC support diagonal noise
+sigma = np.diag(sigma)  # The noise for each time series
 # compute DTF
-D, freqs = mvar.DTF(A_est, sigma)
+D, freqs = mvar.DTF(A_est, sigma, T)
 # compute PDC
-P, freqs = mvar.PDC(A_est, sigma)
+# P, freqs = mvar.PDC(A_est, sigma)
+#%%
 # take take a graph relative to a specific frequency
-freq = 0.111328 # this has to be chosen better
+freq = 10. # this is in Hz and roughly corresponds to Alpha (mu) ERD
+#freq = 28   # this is in Hz and roughly corresponds to Beta ERS
+# select the correspondent weights
 D = D[np.where(freqs == mylib.find_nearest(freqs, freq)),:,:].reshape(64, 64)
-G = Graph.Weighted_Adjacency(D.tolist(), mode = 0) # mode 1 is to say we want an indirected graph
-G.vs["names"] = data.columns.values
+G = Graph.Weighted_Adjacency(D.tolist(), mode = 0) # mode=0 is for directed / mode=1 is for indirected graph
+
+# get channel names, cleaning replacing any dot with a void charachter
+G.vs["names"] = list(map(lambda x: re.sub('\.', '', x), data.columns.values))
+# %%
 G = mygraph.applyTreshold(G, 0.2)
 
 #%%
@@ -62,9 +70,9 @@ local_ind = pd.DataFrame.from_dict(      {
         )
 
 local_ind.set_index("channel", inplace = True)
-#print("\nTop 10 channels by degree\n", local_ind.sort_values(by = "strenght", ascending = False)[1:10])
-#print("\nTop 10 channels by OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10])
-#print("\nTop 10 channels by IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10])
+print("\nTop 10 channels by degree\n", local_ind.sort_values(by = "strenght", ascending = False)[1:10])
+print("\nTop 10 channels by OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10])
+print("\nTop 10 channels by IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10])
 
 
 
@@ -84,7 +92,7 @@ local_ind.set_index("channel", inplace = True)
 
 #%%
 # 2.4 Study the behaviour of global graph indices in function of network density
-
+print("Studying the behaviour of global graph indices in function of network density...")
 densities = [i*0.1 for i in range(1,10)] # edit these with the ones provided by the prof
 # these two lines take some seconds...
 clustering_coeffs = [mygraph.applyTreshold(Graph.Weighted_Adjacency(D.tolist(), mode = 0), i).transitivity_avglocal_undirected() for i in densities]
@@ -103,3 +111,22 @@ axarr[1].plot(densities, average_path_lengths, color = "red")
 axarr[1].set_xlabel("density")
 axarr[1].set_ylabel("average path length")
 axarr[1].grid(linestyle = ":")
+plt.show()
+
+
+#%% Motif analysis
+
+def write_inputFileForMotifAnalysis(G, file):
+    with open(file, 'a') as file:
+        for source in range(G.vcount()):
+            targets = G.get_adjlist()[source]
+            for target in targets:
+                if target != source:
+                    file.write(str(source) + "  " + str(target) +"  " + str(1)+"\n")
+    file.close()
+    return
+
+
+write_inputFileForMotifAnalysis(G, file = './data/inputForMA.txt')
+
+a = np.matrix(G.get_adjacency()._get_data())

@@ -165,7 +165,7 @@ def compute_order(X, p_max):
     return p, bic
 
 
-def spectral_density(A, n_fft=None):
+def spectral_density(A, n_fft=None, t_step=None):
     """Estimate PSD from AR coefficients
 
     Parameters
@@ -187,7 +187,7 @@ def spectral_density(A, n_fft=None):
     A2 = np.zeros((n_fft, N, N))
     A2[1:p + 1, :, :] = A  # start at 1 !
     fA = fftpack.fft(A2, axis=0)
-    freqs = fftpack.fftfreq(n_fft)
+    freqs = fftpack.fftfreq(n_fft, t_step)
     I = np.eye(N)
 
     for i in range(n_fft):
@@ -196,7 +196,7 @@ def spectral_density(A, n_fft=None):
     return fA, freqs
 
 
-def DTF(A, sigma=None, n_fft=None):
+def DTF(A, sigma=None, t_step=None, n_fft=None,):
     """Direct Transfer Function (DTF)
 
     Parameters
@@ -219,7 +219,7 @@ def DTF(A, sigma=None, n_fft=None):
     if n_fft is None:
         n_fft = max(int(2 ** math.ceil(np.log2(p))), 512)
 
-    H, freqs = spectral_density(A, n_fft)
+    H, freqs = spectral_density(A, n_fft, t_step)
     D = np.zeros((n_fft, N, N))
 
     if sigma is None:
@@ -234,7 +234,7 @@ def DTF(A, sigma=None, n_fft=None):
     return D, freqs
 
 
-def PDC(A, sigma=None, n_fft=None):
+def PDC(A, sigma=None, t_step=None, n_fft=None):
     """Partial directed coherence (PDC)
 
     Parameters
@@ -257,7 +257,7 @@ def PDC(A, sigma=None, n_fft=None):
     if n_fft is None:
         n_fft = max(int(2 ** math.ceil(np.log2(p))), 512)
 
-    H, freqs = spectral_density(A, n_fft)
+    H, freqs = spectral_density(A, n_fft, t_step)
     P = np.zeros((n_fft, N, N))
 
     if sigma is None:

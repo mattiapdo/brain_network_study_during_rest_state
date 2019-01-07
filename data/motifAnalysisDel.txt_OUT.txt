@@ -1,0 +1,95 @@
+
+   Summary motif results
+   =====================
+mfinder Version 1.20
+
+MOTIF FINDER RESULTS:
+
+	Network name: ./data/inputForMA.txt
+	Network type: Directed
+	Num of Nodes: 63 Num of Edges: 751
+	Num of Nodes with edges: 63
+	Maximal out degree (out-hub) : 17
+	Maximal in degree (in-hub) : 62
+	Roots num: 25 Leaves num: 0
+	Single Edges num: 619 Mutual Edges num: 60
+
+	Motif size searched  3
+	Total number of 3-node subgraphs : 13371
+	Number of random networks generated : 100
+	Random networks generation method: Switches
+	Num of Switches range: 100.0-200.0, Success switches Ratio:0.137+-0.00
+
+The following motifs were found:
+
+Criteria taken : Nreal Zscore > 2.00
+                 Pval ignored (due to small number of random networks)
+                 Mfactor > 1.10
+                 Uniqueness >= 4
+
+
+
+	Full list includes 3 motifs
+MOTIF	NREAL	NRAND		NREAL	NREAL	UNIQ	CREAL
+ID		STATS		ZSCORE	PVAL	VAL	[MILI]	
+
+46	95	69.7+-5.5	4.63	0.000	5	7.10
+
+0 1 1 
+1 0 1 
+0 0 0 
+
+108	982	883.0+-16.4	6.04	0.000	10	73.44
+
+0 0 1 
+1 0 1 
+1 0 0 
+
+238	50	37.8+-3.3	3.66	0.000	5	3.74
+
+0 1 1 
+1 0 1 
+1 1 0 
+
+
+
+
+Full list of subgraphs size 3 ids:
+
+	( Total num of different subgraphs size 3 is : 13 )
+
+MOTIF	NREAL	NRAND		NREAL	NREAL	CREAL	UNIQ
+ID		STATS		ZSCORE	PVAL	[MILI]	
+6	619	845.3+-28.7	-7.88	1.000	46.29	13
+
+12	1011	1075.4+-24.5	-2.63	1.000	75.61	12
+
+14	81	99.5+-10.0	-1.86	0.970	6.06	5
+
+36	6825	7082.9+-41.1	-6.28	1.000	510.43	19
+
+38	1774	1660.4+-31.2	3.64	0.000	132.68	13
+
+46	95	69.7+-5.5	4.63	0.000	7.10	5
+
+74	1193	1378.2+-28.3	-6.54	1.000	89.22	8
+
+78	60	101.0+-8.7	-4.69	1.000	4.49	4
+
+98	15	23.6+-5.5	-1.56	0.950	1.12	3
+
+102	50	86.4+-7.6	-4.78	1.000	3.74	5
+
+108	982	883.0+-16.4	6.04	0.000	73.44	10
+
+110	157	152.6+-8.8	0.50	0.280	11.74	6
+
+238	50	37.8+-3.3	3.66	0.000	3.74	5
+
+
+
+ (Application total runtime was:   15.0 seconds.)
+
+ (Real network processing runtime was:    0.0 seconds.)
+
+ (Single Random network processing runtime was:    0.1 seconds.)
