@@ -19,23 +19,15 @@ def applyTreshold(G, threshold):
         select = np.random.randint(nrows)
         i, j = arg_min[select,][0,0], arg_min[select,][0,1]
         G.delete_edges([(i,j)])
-            
+
     return G
-
-
-
-"""d = np.matrix([[0,1,0],[1,2,3],[3,2,0]])
-arg_min = np.matrix(np.argwhere(d == np.amin(d)))
-nrows = arg_min.shape[0]
-select = np.random.randint(nrows)
-i, j = arg_min[select,][0,0], arg_min[select,][0,1]"""
 
 import pandas as pd
 import igraph
 
 #%%
 def add_brain_layout(g):
-    chan_loc = pd.read_csv("./data/channels_topology.csv", sep=';', decimal=',') 
+    chan_loc = pd.read_csv("./data/channels_topology.csv", sep=';', decimal=',')
     pos = {row[0]: (row[1],row[2]) for row in chan_loc.values}
     g.vs["coordinates"] = [pos[i["label"]] for i in g.vs]
     igraph.plot(g, pos = g.vs["coordinates"], vertex_label = g.vs["label"])

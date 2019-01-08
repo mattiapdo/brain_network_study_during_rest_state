@@ -6,7 +6,7 @@ Created on Tue Dec 18 23:42:01 2018
 """
 
 import pyedflib
-import mylib 
+import mylib
 import mvar
 import mygraph
 import numpy as np
@@ -49,8 +49,8 @@ G.vs["label"] = list(map(lambda x: re.sub('\.', '', x), data.columns.values))
 # %%
 G = mygraph.applyTreshold(G, 0.05)
 
-#%%  
-G2 = mygraph.add_brain_layout(G)
+#%%
+G = mygraph.add_brain_layout(G)
 
 #%%
 
@@ -58,14 +58,14 @@ visual_style = {}
 visual_style["vertex_size"] = 20
 visual_style["vertex_color"] = "white"
 visual_style["vertex_label"] = G2.vs["label"]
-visual_style["edge_width"] = [1 + 2 * int(weight) for weight in G2.es["weight"]]
-visual_style["layout"] = G2.vs["coordinates"]
-igraph.plot(G2, **visual_style)
+visual_style["edge_width"] = [1 + 2 * int(weight) for weight in G.es["weight"]]
+visual_style["layout"] = G.vs["coordinates"]
+igraph.plot(G, **visual_style)
 
 #%%
 # 2.1
 
-# global clustering coefficient 
+# global clustering coefficient
 # https://igraph.org/python/doc/igraph.Graph-class.html#transitivity_avglocal_undirected
 print("global clustering coefficient = ", round(G.transitivity_avglocal_undirected(), 3))
 
@@ -73,10 +73,10 @@ print("global clustering coefficient = ", round(G.transitivity_avglocal_undirect
 # https://igraph.org/python/doc/igraph.GraphBase-class.html#average_path_length
 print("global average path lenght = ", round(G.average_path_length(directed = False, unconn=True), 3))
 
-local_ind = pd.DataFrame.from_dict(      { 
+local_ind = pd.DataFrame.from_dict(      {
                 "channel" : G.vs["names"] ,
                 "strenght" : G.strength(mode = 3),
-                "out-strength" : G.strength(mode = 1), 
+                "out-strength" : G.strength(mode = 1),
                 "in-strength" : G.strength(mode = 2)
                 }
         )
@@ -89,10 +89,10 @@ print("\nTop 10 channels by IN degree\n", local_ind.sort_values(by = "in-strengt
 
 
 # 2.7
-local_ind = pd.DataFrame.from_dict(      { 
+local_ind = pd.DataFrame.from_dict(      {
                 "channel" : G.vs["names"] ,
                 "strenght" : G.strength(mode = 3,  weights = "weight"),
-                "out-strength" : G.strength(mode = 1,  weights = "weight"), 
+                "out-strength" : G.strength(mode = 1,  weights = "weight"),
                 "in-strength" : G.strength(mode = 2,  weights = "weight")
                 }
         )
