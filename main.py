@@ -12,6 +12,7 @@ import mygraph
 import numpy as np
 import pandas as pd
 from igraph import Graph
+import igraph
 import matplotlib.pyplot as plt
 import re
 
@@ -45,10 +46,18 @@ D = D[np.where(freqs == mylib.find_nearest(freqs, freq)),:,:].reshape(64, 64)
 G = Graph.Weighted_Adjacency(D.tolist(), mode = 0) # mode=0 is for directed / mode=1 is for indirected graph
 
 # get channel names, cleaning replacing any dot with a void charachter
-G.vs["names"] = list(map(lambda x: re.sub('\.', '', x), data.columns.values))
+G.vs["name"] = list(map(lambda x: re.sub('\.', '', x), data.columns.values))
 # %%
-G = mygraph.applyTreshold(G, 0.2)
-
+G = mygraph.applyTreshold(G, 0.05)
+G2 = mygraph.add_brain_topology(G)
+# %%
+visual_style = {}
+visual_style["vertex_size"] = 20
+visual_style["vertex_color"] = "white"
+visual_style["vertex_label"] = G2.vs["name"]
+visual_style["edge_width"] = [1 + 2 * int(weight) for weight in G2.es["weight"]]
+visual_style["layout"] = G2.vs["coordinates"]
+igraph.plot(G2, **visual_style)
 #%%
 
 # 2.1
