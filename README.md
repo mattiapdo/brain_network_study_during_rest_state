@@ -1,5 +1,11 @@
 # README
 
+### Usage
+
+`python main.py`
+
+
+
 ### Motif Analysis
 
 To perform motif analysis we make use of the software `mfinder` version 1.2.
