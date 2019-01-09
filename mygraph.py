@@ -30,5 +30,4 @@ def add_brain_layout(g):
     chan_loc = pd.read_csv("./data/channels_topology.csv", sep=';', decimal=',')
     pos = {row[0]: (row[1],row[2]) for row in chan_loc.values}
     g.vs["coordinates"] = [pos[i["label"]] for i in g.vs]
-    igraph.plot(g, pos = g.vs["coordinates"], vertex_label = g.vs["label"])
     return(g)
