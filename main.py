@@ -12,9 +12,9 @@ import mygraph
 import numpy as np
 import pandas as pd
 from igraph import Graph
-import matplotlib.pyplot as plt
 import re
 import igraph
+
 #%% Load data and store into a dataframe
 path = './data/S001R01.edf'
 print("Loading data from", path)
@@ -112,40 +112,32 @@ print("Top 10 channels by generalized IN degree\n", local_ind.sort_values(by = "
 #%%
 # 2.4 Study the behaviour of global graph indices in function of network density
 print("Studying the behaviour of global graph indices in function of network density...")
-densities = [0.01, 0.05, 0.1, 0.2, 0.3, 0.5] # edit these with the ones provided by the prof
-# these two lines take some seconds...
-clustering_coeffs = [mygraph.applyTreshold(Graph.Weighted_Adjacency(D.tolist(), mode = 0), i).transitivity_avglocal_undirected() for i in densities]
-average_path_lengths = [mygraph.applyTreshold(Graph.Weighted_Adjacency(D.tolist(), mode = 0), i).average_path_length(directed = False, unconn=True) for i in densities]
+densities = [0.05, 0.1, 0.2, 0.3, 0.5] # edit these with the ones provided by the prof
 
+clustering_coeffs = []
+average_path_lengths =  []
+# there is a specific reason why we start from higher densities and then we
+# decrease it: the function applyThreshold takes a graph and simply picks less 
+# important edges (to which correspond low weigths) erasing them from the network:
+# to do that it has to find the minimum above N* x N* weigths. 
+# This is quite computationally expensive in our simple implementation:
+# to speed up a bit our analysis we put the function in the condition of having
+# at each step a smaller amount N*, avoiding to replicate the same minimizations
+# multiple times
+G = Graph.Weighted_Adjacency(D.tolist(), mode = 0)
+for density in densities[::-1]:
+    G = mygraph.applyTreshold(G, density)
+    clustering_coeffs.append(G.transitivity_avglocal_undirected())
+    average_path_lengths.append(G.average_path_length(directed = False, unconn=True))
+    
 #%%
 
-# Two subplots, the axes array is 1-d
-f, axarr = plt.subplots(2, sharex=True, figsize = (9,9))
-axarr[0].plot(densities, clustering_coeffs, color = "green")
-axarr[0].set_title('Global Indices vs Graph Density')
-axarr[0].set_xlabel("density")
-axarr[0].set_ylabel("clustering coefficient")
-axarr[0].grid(linestyle = ":")
-axarr[1].plot(densities, average_path_lengths, color = "red")
-axarr[1].set_xlabel("density")
-axarr[1].set_ylabel("average path length")
-axarr[1].grid(linestyle = ":")
-plt.show()
-
+print("Ploting the result of the analysis")
+mylib.plot_analysis(densities, clustering_coeffs, average_path_lengths)
 
 #%% Motif analysis
 
-def write_inputFileForMotifAnalysis(G, file):
-    with open(file, 'a') as file:
-        for source in range(G.vcount()):
-            targets = G.get_adjlist()[source]
-            for target in targets:
-                if target != source:
-                    file.write(str(source) + "  " + str(target) +"  " + str(1)+"\n")
-    file.close()
-    return
-    
 path = './data/inputForMA.txt'
 print("Writing input file for Motif Analysis to", path)
-write_inputFileForMotifAnalysis(G, file = path)
+mylib.write_inputFileForMotifAnalysis(G, file = path)
 print("\nDone")

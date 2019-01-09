@@ -6,6 +6,7 @@ Created on Wed Dec 19 00:42:40 2018
 """
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def edfToDataFrame(f):
     # number of rows
@@ -75,3 +76,27 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx]
+
+def plot_analysis(densities, clustering_coeffs, average_path_lengths):
+    f, axarr = plt.subplots(2, sharex=True, figsize = (9,9))
+    axarr[0].plot(densities, clustering_coeffs[::-1], color = "green")
+    axarr[0].set_title('Global Indices vs Graph Density')
+    axarr[0].set_xlabel("density")
+    axarr[0].set_ylabel("clustering coefficient")
+    axarr[0].grid(linestyle = ":")
+    axarr[1].plot(densities, average_path_lengths[::-1], color = "red")
+    axarr[1].set_xlabel("density")
+    axarr[1].set_ylabel("average path length")
+    axarr[1].grid(linestyle = ":")
+    plt.show()
+    
+def write_inputFileForMotifAnalysis(G, file):
+    with open(file, 'a') as file:
+        for source in range(G.vcount()):
+            targets = G.get_adjlist()[source]
+            for target in targets:
+                if target != source:
+                    file.write(str(source) + "  " + str(target) +"  " + str(1)+"\n")
+    file.close()
+    return
+    

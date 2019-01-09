@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pandas as pd
 
 def randargmin(b,**kw):
   """ a random tie-breaking argmax"""
@@ -22,8 +23,6 @@ def applyTreshold(G, threshold):
 
     return G
 
-import pandas as pd
-import igraph
 
 #%%
 def add_brain_layout(g):
