@@ -33,49 +33,16 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3604768/
 
 https://arxiv.org/pdf/cond-mat/9903108.pdf
 
+The `bctpy` is the `Python` translation of the Brain Connectivity Toolbox (natively in `MATLAB`) https://github.com/aestrivex/bctpy
 
+- download the repository
+- run  `python setup.py install` 
 
+We make use of two methods:
 
+`bct.randmio_dir(R, iter)`:  this function randomizes a directed network, while preserving the in- and out-degree distributions. In weighted networks, the function preserves the out-strength but not the in-strength distributions.
 
-
-
-The bctpy is the python translation of the https://github.com/aestrivex/bctpy
-
-```
-bct.randmio_dir(R, iter)¶
-    This function randomizes a directed network, while preserving the in- and out-degree distributions. In weighted networks, the function preserves the out-strength but not the in-strength distributions.
-    Parameters:	
-    W : NxN np.ndarray
-        directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
-    Returns:	
-    R : NxN np.ndarray
-        randomized network
-    eff : int
-        number of actual rewirings carried out
-```
-
-```
-bct.latmio_dir(R, iter, D=None)¶
-    This function “latticizes” a directed network, while preserving the in- and out-degree distributions. In weighted networks, the function preserves the out-strength but not the in-strength distributions.
-    Parameters:	
-    R : NxN np.ndarray
-        directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
-    D : np.ndarray | None
-        distance-to-diagonal matrix. Defaults to the actual distance matrix if not specified.
-    Returns:	
-    Rlatt : NxN np.ndarray
-        latticized network in original node ordering
-    Rrp : NxN np.ndarray
-        latticized network in node ordering used for latticization
-    ind_rp : Nx1 np.ndarray
-        node ordering used for latticization
-    eff : int
-        number of actual rewirings carried out
-```
+`bct.latmio_dir(R, iter, D=None)`: this function “latticizes” a directed network, while preserving the in- and out-degree distributions. In weighted networks, the function preserves the out-strength but not the in-strength distributions.
 
 
 
