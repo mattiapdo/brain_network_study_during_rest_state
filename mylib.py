@@ -100,3 +100,6 @@ def write_inputFileForMotifAnalysis(G, file):
     file.close()
     return
     
+
+def swi(L, Ll, Lr, C, Cl, Cr): 
+    return (L-Ll)/(Lr-Ll)*(C-Cr)/(Cl-Cr)

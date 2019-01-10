@@ -14,6 +14,7 @@ import pandas as pd
 from igraph import Graph
 import re
 import igraph
+import bct
 
 #%% Load data and store into a dataframe
 path = './data/S001R01.edf'
@@ -50,13 +51,44 @@ G = Graph.Weighted_Adjacency(D.tolist(), mode = 0) # mode=0 is for directed / mo
 
 # get channel names, cleaning replacing any dot with a void charachter
 G.vs["label"] = list(map(lambda x: re.sub('\.', '', x), data.columns.values))
+G = mygraph.add_brain_layout(G)
 # %%
 threshold = 0.05
 print("Applying a threshold on network density of", round(threshold*100), "%")
 G = mygraph.applyTreshold(G, threshold)
 
-#%%
-G = mygraph.add_brain_layout(G)
+#%% 2.2
+print("Calculating Small World Index...")
+
+Actual = np.array(G.get_adjacency(attribute = "weight").data)
+Lattice, a, b, iter2 = bct.latmio_dir(Actual, 20, D = None)
+Random, iter1 = bct.randmio_dir(Actual, 20)
+
+"""
+# Bootstrap
+B = 3
+Lr = np.array([])
+Cr = np.array([])
+for i in range(B):
+    print(i, Lr)
+    Random, iter1 = bct.randmio_dir(Actual, 20)
+    print(Random[0,1])
+    np.append(Lr, Graph.Weighted_Adjacency(Random.tolist(), mode = 0).average_path_length(directed = True))
+    np.append(Cr, Graph.Weighted_Adjacency(Random.tolist(), mode = 0).transitivity_avglocal_undirected())
+Lr = Lr.mean()
+Cr = Cr.mean()
+"""
+
+L = Graph.Weighted_Adjacency(Actual.tolist(), mode = 0).average_path_length(directed = True)
+Ll = Graph.Weighted_Adjacency(Lattice.tolist(), mode = 0).average_path_length(directed = True)
+Lr = Graph.Weighted_Adjacency(Random.tolist(), mode = 0).average_path_length(directed = True)
+
+C = Graph.Weighted_Adjacency(Actual.tolist(), mode = 0).transitivity_avglocal_undirected()
+Cl = Graph.Weighted_Adjacency(Lattice.tolist(), mode = 0).transitivity_avglocal_undirected()
+Cr = Graph.Weighted_Adjacency(Random.tolist(), mode = 0).transitivity_avglocal_undirected()
+
+SWI = mylib.swi(L, Ll, Lr, C, Cl, Cr)
+print("SWI =", SWI)
 
 #%%
 print("Making a topological representation")
@@ -77,7 +109,7 @@ print("global clustering coefficient = ", round(G.transitivity_avglocal_undirect
 
 # average path length
 # https://igraph.org/python/doc/igraph.GraphBase-class.html#average_path_length
-print("global average path lenght = ", round(G.average_path_length(directed = False, unconn=True), 3))
+print("global average path lenght = ", round(G.average_path_length(directed = True), 3))
 
 print("Microscopic Network Analysis")
 local_ind = pd.DataFrame.from_dict(      {
@@ -118,8 +150,8 @@ clustering_coeffs = []
 average_path_lengths =  []
 # there is a specific reason why we start from higher densities and then we
 # decrease it: the function applyThreshold takes a graph and simply picks less 
-# important edges (to which correspond low weigths) erasing them from the network:
-# to do that it has to find the minimum above N* x N* weigths. 
+# important edges (to which correspond low weights) erasing them from the network:
+# to do that it has to find the minimum above N* x N* weights. 
 # This is quite computationally expensive in our simple implementation:
 # to speed up a bit our analysis we put the function in the condition of having
 # at each step a smaller amount N*, avoiding to replicate the same minimizations
@@ -131,11 +163,11 @@ for density in densities[::-1]:
     average_path_lengths.append(G.average_path_length(directed = False, unconn=True))
     
 #%%
-
+    
 print("Ploting the result of the analysis")
 mylib.plot_analysis(densities, clustering_coeffs, average_path_lengths)
 
-#%% Motif analysis
+#%% 3 Motif analysis
 
 path = './data/inputForMA.txt'
 print("Writing input file for Motif Analysis to", path)
