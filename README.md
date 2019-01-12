@@ -4,6 +4,14 @@
 
 `python main.py`
 
+
+
+freq = 10 Hz roughly corresponds to Alpha (mu) ERD
+
+freq = 28 Hz roughly corresponds to Beta ERS
+
+
+
 ### Small World Networks
 
 Duncan Watts and Steven Strogatz found that
@@ -17,12 +25,13 @@ graphs can be classified according to two important global indexes:
 
 We say a network to be a **small world network** when
 
-- for any given node, neighbors of that node are likely to be neighbors of each other (read: clustering coefficient close to 1)
+- for any given node, neighbors of that node are likely to be neighbors of each other (read: high clustering coefficient)
 
 - the average distance L between two nodes (average shortest path) scales as the logarithm of the number of nodes in the network 
   $$
   L \sim \log N
   $$
+
 
 
 #### Small World Network Index
@@ -48,7 +57,30 @@ We make use of two methods:
 
 ### Motif Analysis
 
-To perform motif analysis we make use of the software `mfinder` version 1.2.
+Roughly speaking, motifs in a given network are induced subgraphs which are recurrent and statistically significant: it appears with a higher frequency that it would be expected in 'similar' random networks.
+
+So let $G$ be a network, and $G_k$ one of its own subnetworks composed by $k$ nodes. If we count how many times $G_k$ appears in $G$ for some $k$, we obtain something really analogous to a frequency spectrum, that can give a description about the basic building blocks of the net.
+
+We can immediately guess that the action of counting how many times a given $G_k$ occurs in $G$ is really computationally expensive (note also that the cardinality of the set $\{ G_k \text{ for k} \in \mathbb{N\} }$ grows exponentially with $k$). That's why one usually concentrate just on subgraphs of size $k = 3, 4$.
+
+To be more formal, we say an induced subgraph $G_k$ of $G$ to be a **motif** (an over represented subgraph) if, for some set of parameters {p, U, D, N} these three requirements are satisfied:
+
+1. $\mathbb{P}(f_{rand}(G_k) > f_{original}(G_k)) < p$
+2. $f_{original}(G_k) > U$
+3. $f_{original}(G_k)- f_{rand}(G_k)>D f_{rand}(G_k)$
+
+Then a $Z$ score is assigned to each induced subgraph
+$$
+Z = \frac{f_{original}(G_k) - <f_{rand}(G_k)>}{s(f_{rand}(G_k))}
+$$
+   where $s(\cdot)$ is the sample standard deviation. 
+
+Important because of their interpretations in many case studies are **anti-motifs** also: they are induced subgraphs that satisfy the following requirements:
+
+1. $\mathbb{P}(f_{rand}(G_k) < f_{original}(G_k)) < p$
+2. $f_{original}(G_k)- f_{rand}(G_k) < D f_{rand}(G_k)$
+
+To perform motif analysis (i.e. to find motifs and anti-motifs in our network), we make use of the software `mfinder` version 1.2.
 
 It is available at http://www.weizmann.ac.il/mcb/UriAlon/research/network-motifs.
 
