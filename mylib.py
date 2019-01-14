@@ -7,6 +7,14 @@ Created on Wed Dec 19 00:42:40 2018
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import pyedflib
+import mylib
+import mvar
+import mygraph
+from igraph import Graph
+import re
+import igraph
+import os
 
 def edfToDataFrame(f):
     # number of rows
@@ -77,6 +85,58 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx]
 
+def receive_data(path, freq = 10, threshold = 0.1, DTF = True):
+    """
+    This function builds a brain network given in input:
+    - path of the EDF file
+    - freq: the frequency we want to conduct analysis on
+    - threshold: a threshold on the graph's density
+    - DFT: boolean: if True estimates the Direct Tranfer Function (DFT)
+                    if False estimates the Partial Directed Coherence (PDC)
+    """
+    #%% Load data and store into a dataframe
+
+    print("Loading data from", path, "...")
+    f = pyedflib.EdfReader(path)
+    print("...done")
+
+    data = mylib.edfToDataFrame(f)
+    f._close()
+    T = 1./f.getSampleFrequencies()[1]
+    measures = data.T.values
+    N, n = measures.shape
+    p = 3
+    A_est, sigma = mvar.mvar_fit(measures, p)
+    sigma = np.diag(sigma)  # The noise for each time series
+    if DTF:
+        # compute DTF
+        print("Computing DFT...")
+        Adj, freqs = mvar.DTF(A_est, sigma, T)
+        print("... done")
+    else:
+        # compute PDC
+        print("Computing PDC")
+        Adj, freqs = mvar.PDC(A_est, sigma, T)
+        print("... done")
+
+    # take take a graph relative to a specific frequency expressed in Hz
+    print("Building network to analyse interactions at", freq, "Hz")
+    # select the correspondent weights
+    Adj = Adj[np.where(freqs == mylib.find_nearest(freqs, freq)),:,:].reshape(64, 64)
+    G = Graph.Weighted_Adjacency(Adj.tolist(), mode = 0) # mode=0 is for directed / mode=1 is for indirected graph
+
+    # get channel names, cleaning replacing any dot with a void charachter
+    G.vs["label"] = list(map(lambda x: re.sub('\.', '', x), data.columns.values))
+    G = mygraph.add_brain_layout(G)
+
+    print("Applying a threshold on network density of", round(threshold*100), "% ...")
+    G = mygraph.applyTreshold(G, threshold)
+    print("... done")
+
+    G.es["arrow_size"] = [0.05 for edge in G.es]
+
+    return G
+
 def plot_analysis(densities, clustering_coeffs, average_path_lengths):
     f, axarr = plt.subplots(2, sharex=True, figsize = (9,9))
     axarr[0].plot(densities, clustering_coeffs[::-1], color = "green")
@@ -89,7 +149,7 @@ def plot_analysis(densities, clustering_coeffs, average_path_lengths):
     axarr[1].set_ylabel("average path length")
     axarr[1].grid(linestyle = ":")
     plt.show()
-    
+
 def write_inputFileForMotifAnalysis(G, file):
     with open(file, 'a') as file:
         for source in range(G.vcount()):
@@ -99,7 +159,7 @@ def write_inputFileForMotifAnalysis(G, file):
                     file.write(str(source) + "  " + str(target) +"  " + str(1)+"\n")
     file.close()
     return
-    
 
-def swi(L, Ll, Lr, C, Cl, Cr): 
+
+def swi(L, Ll, Lr, C, Cl, Cr):
     return (L-Ll)/(Lr-Ll)*(C-Cr)/(Cl-Cr)
