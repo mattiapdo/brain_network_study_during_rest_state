@@ -33,53 +33,6 @@ def edfToDataFrame(f):
 
     return data
 
-
-def print_some_stuff(f):
-
-    print("edfsignals: %i" % f.signals_in_file)
-    print("file duration: %i seconds" % f.file_duration)
-    print("startdate: %i-%i-%i" % (f.getStartdatetime().day,f.getStartdatetime().month,f.getStartdatetime().year))
-    print("starttime: %i:%02i:%02i" % (f.getStartdatetime().hour,f.getStartdatetime().minute,f.getStartdatetime().second))
-    print("recording: %s" % f.getPatientAdditional())
-    print("patientcode: %s" % f.getPatientCode())
-    print("gender: %s" % f.getGender())
-    print("birthdate: %s" % f.getBirthdate())
-    print("patient_name: %s" % f.getPatientName())
-    print("patient_additional: %s" % f.getPatientAdditional())
-    print("admincode: %s" % f.getAdmincode())
-    print("technician: %s" % f.getTechnician())
-    print("equipment: %s" % f.getEquipment())
-    print("recording_additional: %s" % f.getRecordingAdditional())
-    print("datarecord duration: %f seconds" % f.getFileDuration())
-    print("number of datarecords in the file: %i" % f.datarecords_in_file)
-    print("number of annotations in the file: %i" % f.annotations_in_file)
-    # choose a channel
-    channel = 3
-    print("\nsignal parameters for the %d.channel:\n\n" % channel)
-    print("label: %s" % f.getLabel(channel))
-    print("samples in file: %i" % f.getNSamples()[channel])
-    print("physical maximum: %f" % f.getPhysicalMaximum(channel))
-    print("physical minimum: %f" % f.getPhysicalMinimum(channel))
-    print("digital maximum: %i" % f.getDigitalMaximum(channel))
-    print("digital minimum: %i" % f.getDigitalMinimum(channel))
-    print("physical dimension: %s" % f.getPhysicalDimension(channel))
-    print("prefilter: %s" % f.getPrefilter(channel))
-    print("transducer: %s" % f.getTransducer(channel))
-    print("samplefrequency: %f" % f.getSampleFrequency(channel))
-
-    annotations = f.readAnnotations()
-    for n in np.arange(f.annotations_in_file):
-        print("annotation: onset is %f    duration is %s    description is %s" % (annotations[0][n],annotations[1][n],annotations[2][n]))
-
-    buf = f.readSignal(channel)
-    n = 200
-    print("\nread %i samples\n" % n)
-    result = ""
-    for i in np.arange(n):
-        result += ("%.1f, " % buf[i])
-    print(result)
-
-
 def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
@@ -133,9 +86,60 @@ def receive_data(path, freq = 10, threshold = 0.1, DTF = True):
     G = mygraph.applyTreshold(G, threshold)
     print("... done")
 
-    G.es["arrow_size"] = [0.05 for edge in G.es]
+    G.es["arrow_size"] = [0.5 for edge in G.es]
 
     return G
+
+def graph_indices(G, weights = False):
+
+    if weights:
+        print("Macroscopic Network Analysis")
+        # global clustering coefficient
+        # https://igraph.org/python/doc/igraph.Graph-class.html#transitivity_avglocal_undirected
+        print("global clustering coefficient = ", round(G.transitivity_avglocal_undirected(weights = "weight"), 3))
+
+        # average path length
+        # https://igraph.org/python/doc/igraph.GraphBase-class.html#average_path_length
+        print("global average path lenght = ", round(G.average_path_length(directed = True), 3))
+        print("\t the latter is calculated regardless from the weights")
+
+        print("Microscopic Network Analysis")
+        local_ind = pd.DataFrame.from_dict(      {
+                "channel" : G.vs["label"] ,
+                "strength" : G.strength(mode = 3,  weights = "weight"),
+                "out-strength" : G.strength(mode = 1,  weights = "weight"),
+                "in-strength" : G.strength(mode = 2,  weights = "weight")
+                }
+        )
+
+        local_ind.set_index("channel", inplace = True)
+        print("Top 10 channels by generalized degree\n", local_ind.sort_values(by = "strength", ascending = False)[1:10]["strength"])
+        print("Top 10 channels by generalized OUT degree\n", local_ind.sort_values(by = "out-strength", ascending = False)[1:10]["out-strength"])
+        print("Top 10 channels by generalized IN degree\n", local_ind.sort_values(by = "in-strength", ascending = False)[1:10]["in-strength"])
+
+    else:
+        print("Macroscopic Network Analysis")
+        # global clustering coefficient
+        # https://igraph.org/python/doc/igraph.Graph-class.html#transitivity_avglocal_undirected
+        print("global clustering coefficient = ", round(G.transitivity_avglocal_undirected(), 3))
+
+        # average path length
+        # https://igraph.org/python/doc/igraph.GraphBase-class.html#average_path_length
+        print("global average path lenght = ", round(G.average_path_length(directed = True), 3))
+
+        print("Microscopic Network Analysis")
+        local_ind = pd.DataFrame.from_dict(      {
+                        "channel" : G.vs["label"] ,
+                        "degree" : G.strength(mode = 3),
+                        "out-degree" : G.strength(mode = 1),
+                        "in-degree" : G.strength(mode = 2)
+                        }
+                )
+
+        local_ind.set_index("channel", inplace = True)
+        print("Top 10 channels by degree\n", local_ind.sort_values(by = "degree", ascending = False)[1:10]["degree"])
+        print("Top 10 channels by OUT degree\n", local_ind.sort_values(by = "out-degree", ascending = False)[1:10]["out-degree"])
+        print("Top 10 channels by IN degree\n", local_ind.sort_values(by = "in-degree", ascending = False)[1:10]["in-degree"])
 
 def plot_analysis(densities, clustering_coeffs, average_path_lengths):
     f, axarr = plt.subplots(2, sharex=True, figsize = (9,9))

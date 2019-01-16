@@ -60,8 +60,6 @@ $ 	$
 
 Duncan Watts and Steven Strogatz found that
 
-[1]: https://en.wikipedia.org/wiki/Small-world_network#cite_note-3	"Watts, Duncan J.; Strogatz, Steven H. (June 1998). &quot;Collective dynamics of &#39;small-world&#39; networks&quot;. Nature. 393 (6684): 440–442"
-
 graphs can be classified according to two important global indexes:
 
 1. clustering coefficient
@@ -75,6 +73,7 @@ We say a network to be a **small world network** when
   $$
   L \sim \log N
   $$
+
 
 
 

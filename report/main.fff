@@ -1,0 +1,93 @@
+\begin{figure}
+\includegraphics[width=0.7\linewidth]{../open_top_repr}
+\caption{Topographical representation of directed connectivity network for \textbf{open eyes} with density d = 0.05 (top view, nose down)}
+\label{fig:opentoprepr}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../closed_top_repr}
+\caption{Topographical representation of directed connectivity network for \textbf{closed eyes} with density d = 0.05 (top view, nose down)}
+\label{fig:closedtoprepr}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=1\linewidth]{../summary_2}
+\caption[didascalia breve]{Summary of binary global and local graph indices (top ten channels are listed) for both case studies.}
+\label{fig:summary2}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.5\linewidth]{../global_indices_wrt_density}
+\caption{With increasing density, we shall see that the global clustering coefficient is positively related to the density of the graph. This is expected, since the clustering coefficient is a measure of the the degree to which nodes in the graph generally tend to cluster together: when the density increases the average degree of the graph increases and as a result, it is more likely that neighbours of any given node are neighbours with each other.\\ At the same time, the more dense is a network, the more likely it is to find a shorter path that connects any two given nodes, and this gives the intuition why to higher densities correspond lower average shortest paths.}
+\label{fig:globalindiceswrtdensity}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../motifs_we_found}
+\caption{Dictionary of the patterns that appear as motifs or anti-motifs in our case studies}
+\label{fig:motifswefound}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../motif_open}
+\caption{Topographical representation of EO case for the motif with id = 36}
+\label{fig:motifopen}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../motif_closed}
+\caption{Topographical representation of EC case for the motif with id = 36}
+\label{fig:motifclosed}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../motif_given_channel_Po3}
+\caption{Motifs which involve the channel Po3 }
+\label{fig:motifgivenchannelpo3}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../liouvain_open}
+\caption{EO case - Louvain method - Modularity based approach}
+\label{fig:liouvainopen}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../liouvain_closed}
+\caption{EC case - Louvain method - Modularity based approach}
+\label{fig:liouvainclosed}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../infoTheo_open}
+\caption{EO case - Infomap method - Information theory based approach}
+\label{fig:infotheoopen}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{../infoTheo_closed}
+\caption{EC case - Infomap method - Information theory based approach}
+\label{fig:infotheoclosed}
+\end{figure}

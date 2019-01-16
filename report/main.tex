@@ -32,6 +32,8 @@
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
 \usepackage{bm}% bold math
+\usepackage{amssymb} 
+%\usepackage[nomarkers,figuresonly]{endfloat}
 %\usepackage[mathlines]{lineno}% Enable numbering of text and display math
 %\linenumbers\relax % Commence numbering lines
 
@@ -48,12 +50,6 @@
 \date{\today}% It is always \today, today,
              %  but any date may be explicitly specified
 
-\begin{abstract}
-AbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstract AbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstract AbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstract AbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstract AbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstract AbstractAbstractAbstractAbstractAbstract
-\end{abstract}
-
-% \pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
-                             % Classification Scheme.
 \keywords{EEG data, brain network, connectivity graph, graph indices, motif analysis, community detection}%Use showkeys class option if keyword
                               %display desired
 \maketitle
@@ -63,9 +59,11 @@ AbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstractAbstract
 % \subsection{\label{sec:level2}Second-level heading}
 % \subsubsection{\label{sec:level3}Third-level heading}
 
-The goal of this project is to conduct some analysis on two datasets of EEG data. Data \cite{dataset} are taken from a public repository published from the Physionet Project. This data set consists of over 1500 one- and two-minute EEG recordings, obtained from 109 volunteers, but in our tasks we used just two runs from a specific subject (\verb|S001|): the first run - \verb|R01| - is recorded during eyes-open (EO) resting state, while the second one - \verb|R02| - is recorded during eyes-closed (EC) resting state.
+The goal of this project is to conduct some analysis on two datasets of EEG data. In this report we explain briefly what we did and we try to get some insight from the results of the analysis. For a complete list of the tasks completed, see Appendix A.
 
-Generally we worked in \verb|python|, so in order to read EEG data, that are stored in EDF format we used the \verb|pyedflib| library \cite{pyedflib}
+Data \cite{dataset} are taken from a public repository published from the Physionet Project. This data set consists of over 1500 one- and two-minute EEG recordings, obtained from 109 volunteers, but in our tasks we used just two runs from a specific subject (\verb|S001|): the first run - \verb|R01| - is recorded during eyes-open (EO) resting state, while the second one - \verb|R02| - is recorded during eyes-closed (EC) resting state.
+
+Generally we worked in Python, so in order to read EEG data, that are stored in \verb|EDF| format we used the \verb|pyedflib| library \cite{pyedflib}
 
 \section{\label{sec:level1}Connectivity Graphs}
 
@@ -124,13 +122,284 @@ Once we calculated these estimators, choosing a particular frequency $f^*$ we ca
 
 We conduct the analysis below selecting the topology that arises choosing $f^* = \text{10 Hz}$; they basically corresponds to the alpha waves (8 – 12.5 Hz), that predominantly originate from the occipital lobe during wakeful relaxation with closed eyes. Alpha waves are reduced with open eyes, drowsiness and sleep\cite{alphaPalva}.
 
-We also generate the graphs relative to $f^* = \text{28 Hz}$, i.e. to high beta waves (20.5–28 Hz); beta states are the states associated with normal waking consciousness \cite{betaWiki}.
+We also generate the graphs relative to $f^* = \text{28 Hz}$, i.e. to high beta waves (20.5–28 Hz); beta states are the states associated with normal waking consciousness \cite{betaWiki}.\\
+
+When creating a graph object, we put a threshold on network density. Through a custom function we iteratively select the less meaningful edge - i.e. edge with the lowest weight - and we delete it, until criteria on the density is satisfied. In case of multiple edges with equal lowest weight, what the function does is to select one of them at random. Unless otherwise stated, we will refer to graphs with density d = 0.05.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{../open_top_repr}
+	\caption{Topographical representation of directed connectivity network for \textbf{open eyes} with density d = 0.05 (top view, nose down)}
+	\label{fig:opentoprepr}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../closed_top_repr}
+	\caption{Topographical representation of directed connectivity network for \textbf{closed eyes} with density d = 0.05 (top view, nose down)}
+	\label{fig:closedtoprepr}
+\end{figure}
 
 \section{\label{sec:level1}Graph Theory Indices}
+\subsection{\label{sec:level2}Global and Local Indices}
+
+We calculated basic indexes - both global and local - regarding the graphs generated with the techniques written above. In Figure \ref{fig:summary2} it is listed a summary that refers to binary networks. We also computed their respective weighted analogous that it is not shown in this report (for details see the attached material: \verb|main.html|).
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{../summary_2}
+	\caption[didascalia breve]{Summary of binary global and local graph indices (top ten channels are listed) for both case studies.}
+	\label{fig:summary2}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\linewidth]{../global_indices_wrt_density}
+	\caption{With increasing density, we shall see that the global clustering coefficient is positively related to the density of the graph. This is expected, since the clustering coefficient is a measure of the the degree to which nodes in the graph generally tend to cluster together: when the density increases the average degree of the graph increases and as a result, it is more likely that neighbours of any given node are neighbours with each other.\\ At the same time, the more dense is a network, the more likely it is to find a shorter path that connects any two given nodes, and this gives the intuition why to higher densities correspond lower average shortest paths.}
+	\label{fig:globalindiceswrtdensity}
+\end{figure}
+
+
+
+\subsection{\label{sec:level2}Small World Index}
+
+Duncan Watts and Steven Strogatz \cite{WattsDuncan} found that graphs can be classified according to two important global indexes:
+
+\begin{itemize}
+	\item clustering coefficient
+	\item average shortest path
+\end{itemize}
+
+Empirical evidence shows that many real world systems appear to be in the middle, in the sense that they share with regular networks the fact that they have an high clustering coefficient (not true for random networks), but on the other hand on these graphs, it can take only a few steps to reach, from one source, whatever target - the latter being a characteristic of random networks and not of lattices.
+
+Watts and Strogatz measured that in fact many real-world networks have a small average shortest path length but also a clustering coefficient significantly higher than expected by random chance.
+
+Small world networks can be considered as a trade off between two limiting topologies\cite{smallBarth}: the regular lattice, and the random graph.
+
+We consider a graph to be a \textit{small world network} when
+
+\begin{itemize}
+	\item for any given node, neighbours of that node are likely to be connected to each other (read: high clustering coefficient)
+	\item the average distance L between two nodes (average shortest path) scales as the logarithm of the number of nodes in the network: $L \sim \log N$
+	
+\end{itemize}
+
+Several indexes have been proposed to measure how much a given graph satisfies these requirements\cite{smallWiki} and we will focus our attention on the small world index - \textit{SWI}. It is defined\cite{swi} as follows:
+
+\begin{equation}
+	\text{SWI} = \frac{L-L_l}{L_r-L_l} \times \frac{C-C_r}{C_l-C_r}
+\end{equation}
+
+where $C$ and $ L $ denote the clustering coefficient and average path length respectively of the actual network;  $C_r$ and $ L_r $ refer to an equivalent random network with same degree distribution, $C_l$ and $ L_l $ refer to an equivalent lattice network with same degree distribution.
+
+Like Telesford et al \cite{smallTelesford}, we created equivalent random graphs by assigning an edge to a node pair with uniform probability while maintaining the degree distribution of the original graph\cite{maslov}, as well as using a modified version of the “latticization” algorithm\cite{sporns} found in the Brain Connectivity Toolbox\cite{bct} - we actually used \verb|bctpy|\cite{bctpy}, the Python version of the Brain Connectivity Toolbox (natively in `MATLAB`).\\
+
+Regarding the estimation of $L_r$ and $ C_r $, since by definition they are obtained after the generation of a random network, we performed a bootstrap procedure so as to get their average value. Unfortunately, it has not been possible to sample the randomized network a lot of times because the implementation of the algorithm was not optimal time-wise. \\
+
+We found
+\[ \text{SWI} =  -0.257 \text{\quad for the EO case}\]
+\[ \text{SWI} =  0.665 \text{\quad for the EC case}\]
+
+We actually doubt these results because of the aforementioned low number of simulations, and for the negative index we received as an output in the EO condition.
 
 \section{\label{sec:level1}Motif Analysis}
 
+Roughly speaking, motifs in a given network are induced sub-graphs which are recurrent and statistically significant: in other words, they appear with a higher frequency than expected in 'similar' random networks.\\
+
+Let $G$ be a network, and $G_k$ one of its own sub-networks composed by $k$ nodes. If we count how many times $G_k$ appears in $G$ for some $k$, we obtain something really analogous to a frequency spectrum, that can give a description about the basic building blocks of the net.\\
+
+We can immediately guess that the action of counting how many times a given $G_k$ occurs in $G$ is highly computationally expensive (note also that the cardinality of the set $\{ G_k \text{ for k} \in \mathbb{N\} }$ grows exponentially with $k$). That's why one usually concentrate just on sub-graphs of size $k = 3, 4$.\\
+
+To be more formal, we consider an induced sub-graph $G_k$ of $G$ to be a \textbf{motif} (an over represented sub-graph) if, for some set of parameters {p, U, D, N} these three requirements are satisfied:
+
+\begin{itemize}
+	\item[1] $\mathbb{P}(f_{rand}(G_k) > f_{original}(G_k)) < p$
+	\item[2] $f_{original}(G_k) > U$
+	\item[3] $f_{original}(G_k)- f_{rand}(G_k)>D f_{rand}(G_k)$
+\end{itemize}
+
+A $Z$ score can be assigned to each sub-graph such that
+
+\begin{equation}
+	Z = \frac{f_{original}(G_k) - <f_{rand}(G_k)>}{s(f_{rand}(G_k))}
+\end{equation}
+
+where $s(\cdot)$ is the sample standard deviation. 
+Another important feature due to its interpretation in many case studies is the \textbf{anti-motif} : an induced sub-graph that satisfies the following requirements:
+
+\begin{itemize}
+	\item[1] $\mathbb{P}(f_{rand}(G_k) < f_{original}(G_k)) < p$
+	\item[2] $f_{original}(G_k)- f_{rand}(G_k) < D f_{rand}(G_k)$
+\end{itemize}
+
+To perform motif analysis (i.e. to find motifs and anti-motifs in our network), we make use of the software \verb|mfinder| version 1.2\cite{mfinder}.
+
+It has not a graphical interface, and we must use the terminal, running the following command:\\
+
+\verb|mfinder1.2 ./data/motifAnalysis_CLOSED.txt |\\
+
+\verb|-s 3 -r 1500 -nu -ospmem 36|\\
+
+Here is the description of the flag commands we used:
+\begin{itemize}
+	\item[] \verb|-s| is the desired sub-graph size
+	\item[] \verb|-r| is the number of random networks to be generated
+	\item[] \verb|-nu| ignores uniqueness threshold
+	\item[] \verb|-ospmem| outputs members of a list of a specific sub-graph
+\end{itemize}
+
+In our case we generated r =1000 random networks searching for the motif with id=36 which corresponds to the triad schema (s = 3) $ A\rightarrow B \leftarrow C $. Ignoring the uniqueness threshold we obtain the desired results about the pattern appearance in our graph as well as the random generated graphs.\\
+
+The software outputs a table with some statistics regarding the candidate motifs that are repeated both in the randomized and our connections involved in the configured network.
+
+By examining the frequency (z-score) and the statistical significance (p-value) of each candidate we chose as motifs all the candidates with $ p \leq 0.001 $ and $ Z \geq 3$, and as anti-motifs the sub-graphs with $ p \geq 0.99 $ and $ Z \leq -3$.
+
+Results are shown in Table \ref{table:motif-analysis}.\\
+
+\begin{table}[]
+	\centering
+	\begin{tabular}{llllllll}
+		\multicolumn{4}{c}{Case Eyes Open} & \multicolumn{4}{c}{Case Eyes Closed} \\
+		id & frequency & z-score & p-value & id & frequency & z-score & p-value \\
+		38& 86 & 4.37 & 0.0001 &  36& 2559 & -6.10 & 1.000 \\
+		108& 33  &3.44  & 0.0001 &  &  &  & \\
+		6 & 42 & -6.43 & 1.000 & & & & \\
+		36 & 1338 & -4.31 & 1.000 & & & & \\
+		12 & 100 & -4.56 & 1.000 & & & & \\
+		
+	\end{tabular}
+	\caption{motif-analysis}
+	\label{table:motif-analysis}
+\end{table}
+
+Given the results corresponding to the motif analysis we concluded in selecting two motifs (38, 108) and  three anti-motifs (6, 36, 12) for case EO and just one anti-motif (id = 36) in case EC. Look at the Figure \ref{fig:motifswefound} to see the patterns which describe selected id.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../motifs_we_found}
+	\caption{Dictionary of the patterns that appear as motifs or anti-motifs in our case studies}
+	\label{fig:motifswefound}
+\end{figure}
+
+
+As we shall see the anti-motif with id=36 appears in both resting cases.
+
+A topographical representation (Figure \ref{fig:motifopen} and Figure \ref{fig:motifclosed}) is provided for the motif with pattern $ A\rightarrow B \leftarrow C $ of the networks, considering only the connections involved in the configuration of the resting cases. Given the list of motifs with this pattern (id = 36) we draw edges with a larger width whether they connect two nodes more frequently.
+\\
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../motif_open}
+	\caption{Topographical representation of EO case for the motif with id = 36}
+	\label{fig:motifopen}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../motif_closed}
+	\caption{Topographical representation of EC case for the motif with id = 36}
+	\label{fig:motifclosed}
+\end{figure}
+
+Regarding motif analysis, it is also possible, given a channel, to obtain the list of motifs that channel is involved with. For example, in Figure \ref{fig:motifgivenchannelpo3} we list the count of motifs that have channel \verb|Po3| as a node, which is placed in the parieto-occipital scalp region.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../motif_given_channel_Po3}
+	\caption{Motifs which involve the channel Po3 }
+	\label{fig:motifgivenchannelpo3}
+\end{figure}
+
+
 \section{\label{sec:level1}Community Detection}
+
+Based on the graph we have constructed before with a density equal to 5\%, we identify the community structure of the network.\\
+
+A network is said to have community structure if the nodes of the network can be easily grouped into (potentially overlapping) sets of nodes such that each set of nodes is densely connected internally. The more general definition is based on the principle that pairs of nodes are more likely to be connected if they are both members of the same community(ies), and less likely to be connected if they do not share communities. \\
+
+Finding an underlying community structure in a network, if it exists, appears to be important since communities allow us to create a large-scale map of a network. This is because individual communities act like meta-nodes in the entire network, fact that makes the analysis easier\cite{wikiCommu}. \\
+
+For determining the number and composition (list of nodes and the corresponding community) of the communities, we used two methods which are based on different principles. So, in the context of community detection, we use the Louvain Method and the map equation known as Infomap. The former method is considered as a modularity-based approach in a sense that: first small communities are found by optimizing modularity locally on all nodes, then each small community is grouped into one node and the first step is repeated. The value to be optimized is modularity itself, defined as a value between -1 and 1 that measures the density of links inside communities compared to links between communities. Generally, for a weighted graph, (as in our case) modularity is defined as:
+
+\begin{equation}
+	Q = \frac{1}{2m} \sum_{ij} \left[ A_{ij} - \frac{k_i k_j}{2m} \right] \delta(c_i, c_j)
+\end{equation}
+
+where $ A_{ij} $ represents the edge weight between node i and j, $ k_i $ and $ k_j $ are the sum of the weights of the edges attached to nodes i and j respectively, $ 2m $ is the sum of all the edge weights in the graph, $ c_i $ and $ c_j $ are the communities of the nodes.\\
+
+This method when applied is like performing a clustering algorithm that results in hierarchical refinements of the network's partitions. For this purpose we used the implementation available on the \verb|python-louvain| package which facilitates community detection of networks and builds on the \verb|igraph| package\cite{wikiLouv}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../liouvain_open}
+	\caption{EO case - Louvain method - Modularity based approach}
+	\label{fig:liouvainopen}
+\end{figure}
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../liouvain_closed}
+	\caption{EC case - Louvain method - Modularity based approach}
+	\label{fig:liouvainclosed}
+\end{figure}
+
+The latter approach, the application of Infomap, is mainly used for directed weighted graphs in order to identify communities according to how the information flows in the network. Huffman codes are used to give short codewords for commonly visited nodes and long codewords for rarely visited nodes. Below we cite the map equation and at the same time explain each component\cite{black}.
+
+
+\begin{equation}
+	L(M) = q_{\curvearrowleft} H(Q) + \sum_{i=1}^{m} p_{i \circlearrowright} H(P_i)
+\end{equation}
+
+
+\[ 	L(M)  \]
+is the per-step description length for module partition M. That is, for module partition M of n nodes into m modules, the lower bound of the average length of
+the code describing a step of the random walker.
+
+\[ 	q_{\curvearrowleft} = \sum_{i=1}^{m} q_{i\curvearrowleft} \]
+
+is the rate at which the index codebook is used. The per-step use rate of the index
+codebook is given by the total probability that the random walker enters any of
+them modules.
+
+\[ 	H(Q) = - \sum_{i=1}^{m}\left(\frac{ q_{i\curvearrowleft}}{ q_{\curvearrowleft}} \right) \log \frac{ q_{i\curvearrowleft}}{ q_{\curvearrowleft}} \]
+
+is the frequency-weighted average length of codewords in the index codebook.
+The entropy of the relative rates to use the module codebooks measures the
+smallest average codeword length that is theoretically possible.
+
+\[ 	p_{i \circlearrowright} = \sum_{\alpha \in i} p_{\alpha} + q_{i \curvearrowright}  \]
+
+is the rate at which the module codebook i is used, which is given by the total
+probability that any node in the module is visited, plus the probability that the
+random walker exits the module and the exit codeword is used.
+
+	\[ H(P_i) = - \frac{ q_{i \curvearrowright} } { p_{i \circlearrowleft} } \log \frac{q_{i \curvearrowright}}{  p_{i \circlearrowleft} }- \sum_{\alpha \in i} \frac{ p_{\alpha }}{ p_{i \circlearrowleft} } \log \frac{ p_{\alpha}}{ p_{i \circlearrowleft} } \]
+
+is the frequency-weighted average length of codewords in module codebook i. The
+entropy of the relative rates at which the random walker exits module i and visits
+each node in module i measures the smallest average codeword length that
+is theoretically possible.\\
+
+Essentially, the function and the essence of Infomap  is the minimization of the description length (Rissanen, 1978) of a random walker defined on the network through a set of processes. Consequently, we used the Infomap implementation which was available in the \verb|igraph| package.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../infoTheo_open}
+	\caption{EO case - Infomap method - Information theory based approach}
+	\label{fig:infotheoopen}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{../infoTheo_closed}
+	\caption{EC case - Infomap method - Information theory based approach}
+	\label{fig:infotheoclosed}
+\end{figure}
+
+Regarding the performance of the two previously mentioned methods we can conclude that with decreasing the network density the number of communities increases in both cases.
+More specifically, with density equal to 5\%, Infomap always finds few communities regarding both resting cases. However, when a modularity-based method is applied such as the Louvain method, more communities than Infomap are found (always strictly more than one for both rest cases) for the specific average degree of our network. See Figure \ref{fig:liouvainopen} and Figure \ref{fig:liouvainclosed}.\\
+
+These results show that with increasing network density, the Louvain Method results are not representative enough since we have each time few small communities either our graph is relatively dense or sparse. On the other hand, the Infomap method (information theory approach) detects always, even when our graph is sparse enough, a single community in the rest case where the eyes are closed (fact that intuitively makes some sense) while in the eyes-open case when applied a mid-range density (5\%-20\%) the number of computed communities varies from 1-3. See Figure \ref{fig:infotheoopen} and \ref{fig:infotheoclosed}.
 
  	
 \section{References}
@@ -151,21 +420,62 @@ We also generate the graphs relative to $f^* = \text{28 Hz}$, i.e. to high beta 
 	Foster, J. J., Sutterer, D. W., Serences, J. T., Vogel, E. K., Awh, E. (2017). Alpha-Band Oscillations Enable Spatially and Temporally Resolved Tracking of Covert Spatial Attention. Psychological Science, 28(7), 929–941. \url{https://doi.org/10.1177/0956797617699167}\\
 	
 	\bibitem{alphaPalva}
-	New vistas for $\alpha$-frequency band oscillations, Satu Palva,J. Matias Palva, Trends in Neurosciences, Elsevier, April 2007
+	New vistas for $\alpha$-frequency band oscillations, Satu Palva,J. Matias Palva, Trends in Neurosciences, Elsevier, April 2007\\
 	
 	\bibitem{betaWiki}
-	\url{https://en.wikipedia.org/wiki/Beta_wave}
+	\url{https://en.wikipedia.org/wiki/Beta_wave}\\
+	
+	\bibitem{WattsDuncan}
+	Watts, Duncan J.; Strogatz, Steven H. (June 1998). "Collective dynamics of small-world; networks";. Nature. 393 (6684): 440–442\\
+	
+	\bibitem{smallWiki}
+	\url{https://en.wikipedia.org/wiki/Small-world_network}\\
+	
+	\bibitem{smallBarth}
+	\url{https://arxiv.org/pdf/cond-mat/9903108.pdf}\\
+
+	\bibitem{swi}
+	Neal, Zachary P. (2017). "How small is it? Comparing indices of small worldliness". Network Science. 5 (1): 30–44. doi:10.1017/nws.2017.5. ISSN 2050-1242.\\
+	
+	\bibitem{smallTelesford}
+	Telesford QK, Joyce KE, Hayasaka S, Burdette JH, Laurienti PJ. The ubiquity of small-world networks. Brain Connect. 2011;1(5):367-75.\\
+	
+	\bibitem{bct}
+	\url{www.brain-connectivity-toolbox.net}\\
+	
+	\bibitem{bctpy}
+	\url{https://github.com/aestrivex/bctpy}\\
+	
+	\bibitem{maslov}
+	Maslov S. Sneppen K. Specificity and stability in topology of protein networks. Science. 2002;296:910–913.\\
+	
+	\bibitem{sporns}
+	The small world of the cerebral cortex.
+	Sporns O, Zwi JD
+	Neuroinformatics. 2004; 2(2):145-62.\\
+	
+	\bibitem{wikiCommu}
+	\url{https://en.wikipedia.org/wiki/Community_structure}\\
+	 
+	\bibitem{wikiLouv}
+	\url{https://en.wikipedia.org/wiki/Louvain_Modularity}\\
+	 
+	\bibitem{black}
+	\url{http://www.mapequation.org/assets/publications/mapequationtutorial.pdf}\\
+	
+	\bibitem{mfinder}
+	It is available at \url{http://www.weizmann.ac.il/mcb/UriAlon/research/network-motifs}\\
+	
 	
 \end{thebibliography}
 
 
 \appendix
 
-\section{\label{sec:level1}Figures}
 
-\section{\label{sec:level1}Tables}
+\section{\label{sec:level1}Extra Material}
 
-
+The code that produces these results is contained inside \verb|main.html| that can be opened with a common browser. Many of the functions can be found into \verb|mvar.py|, \verb|mygraph.py|, \verb|mylib.py|.
 
 \begin{center}
 	\begin{tabular}{|c|c|} 
@@ -204,7 +514,7 @@ We also generate the graphs relative to $f^* = \text{28 Hz}$, i.e. to high beta 
 		\hline
 		4.3 & C \\
 		\hline
-	\end{tabular}
+	\end{tabular}	
 \end{center}
 
 
@@ -217,251 +527,4 @@ We also generate the graphs relative to $f^* = \text{28 Hz}$, i.e. to high beta 
 
 
 
-
-
-
-\clearpage
-
-\section{\label{sec:level1}First-level heading}
-
-When commands are referred to in this example file, they are always
-shown with their required arguments, using normal \TeX{} format. In
-this format, \verb+#1+, \verb+#2+, etc. stand for required
-author-supplied arguments to commands. For example, in
-\verb+\section{#1}+ the \verb+#1+ stands for the title text of the
-author's section heading, and in \verb+\title{#1}+ the \verb+#1+
-stands for the title text of the paper.
-
-Line breaks in section headings at all levels can be introduced using
-\textbackslash\textbackslash. A blank input line tells \TeX\ that the
-paragraph has ended. 
-
-\subsection{\label{sec:level2}Second-level heading: Formatting}
-
-This file may be formatted in both the \texttt{preprint} (the default) and
-\texttt{reprint} styles; the latter format may be used to 
-mimic final journal output. Either format may be used for submission
-purposes; however, for peer review and production, AIP will format the
-article using the \texttt{preprint} class option. Hence, it is
-essential that authors check that their manuscripts format acceptably
-under \texttt{preprint}. Manuscripts submitted to AIP that do not
-format correctly under the \texttt{preprint} option may be delayed in
-both the editorial and production processes.
-
-The \texttt{widetext} environment will make the text the width of the
-full page, as on page~\pageref{eq:wideeq}. (Note the use the
-\verb+\pageref{#1}+ to get the page number right automatically.) The
-width-changing commands only take effect in \texttt{twocolumn}
-formatting. It has no effect if \texttt{preprint} formatting is chosen
-instead.
-
-\subsubsection{\label{sec:level3}Third-level heading: Citations and Footnotes}
-
-Citations in text refer to entries in the Bibliography;
-they use the commands \verb+\cite{#1}+ or \verb+\onlinecite{#1}+. 
-Because REV\TeX\ uses the \verb+natbib+ package of Patrick Daly, 
-its entire repertoire of commands are available in your document;
-see the \verb+natbib+ documentation for further details.
-The argument of \verb+\cite+ is a comma-separated list of \emph{keys};
-a key may consist of letters and numerals. 
-
-By default, citations are numerical; \cite{feyn54} author-year citations are an option. 
-To give a textual citation, use \verb+\onlinecite{#1}+: (Refs.~\onlinecite{witten2001,epr,Bire82}). 
-REV\TeX\ ``collapses'' lists of consecutive numerical citations when appropriate. 
-REV\TeX\ provides the ability to properly punctuate textual citations in author-year style;
-this facility works correctly with numerical citations only with \texttt{natbib}'s compress option turned off. 
-To illustrate, we cite several together \cite{feyn54,witten2001,epr,Berman1983}, 
-and once again (Refs.~\onlinecite{epr,feyn54,Bire82,Berman1983}). 
-Note that, when numerical citations are used, the references were sorted into the same order they appear in the bibliography. 
-
-A reference within the bibliography is specified with a \verb+\bibitem{#1}+ command,
-where the argument is the citation key mentioned above. 
-\verb+\bibitem{#1}+ commands may be crafted by hand or, preferably,
-generated by using Bib\TeX. 
-The AIP styles for REV\TeX~4 include Bib\TeX\ style files
-\verb+aipnum.bst+ and \verb+aipauth.bst+, appropriate for
-numbered and author-year bibliographies,
-respectively. 
-REV\TeX~4 will automatically choose the style appropriate for 
-the document's selected class options: the default is numerical, and
-you obtain the author-year style by specifying a class option of \verb+author-year+.
-
-This sample file demonstrates a simple use of Bib\TeX\ 
-via a \verb+\bibliography+ command referencing the \verb+aipsamp.bib+ file.
-Running Bib\TeX\ (in this case \texttt{bibtex
-aipsamp}) after the first pass of \LaTeX\ produces the file
-\verb+aipsamp.bbl+ which contains the automatically formatted
-\verb+\bibitem+ commands (including extra markup information via
-\verb+\bibinfo+ commands). If not using Bib\TeX, the
-\verb+thebibiliography+ environment should be used instead.
-
-\paragraph{Fourth-level heading is run in.}%
-Footnotes are produced using the \verb+\footnote{#1}+ command. 
-Numerical style citations put footnotes into the 
-bibliography\footnote{Automatically placing footnotes into the bibliography requires using BibTeX to compile the bibliography.}.
-Author-year and numerical author-year citation styles (each for its own reason) cannot use this method. 
-Note: due to the method used to place footnotes in the bibliography, \emph{you
-must re-run BibTeX every time you change any of your document's
-footnotes}. 
-
-\section{Math and Equations}
-Inline math may be typeset using the \verb+$+ delimiters. Bold math
-symbols may be achieved using the \verb+bm+ package and the
-\verb+\bm{#1}+ command it supplies. For instance, a bold $\alpha$ can
-be typeset as \verb+$\bm{\alpha}$+ giving $\bm{\alpha}$. Fraktur and
-Blackboard (or open face or double struck) characters should be
-typeset using the \verb+\mathfrak{#1}+ and \verb+\mathbb{#1}+ commands
-respectively. Both are supplied by the \texttt{amssymb} package. For
-example, \verb+$\mathbb{R}$+ gives $\mathbb{R}$ and
-\verb+$\mathfrak{G}$+ gives $\mathfrak{G}$
-
-In \LaTeX\ there are many different ways to display equations, and a
-few preferred ways are noted below. Displayed math will center by
-default. Use the class option \verb+fleqn+ to flush equations left.
-
-Below we have numbered single-line equations, the most common kind: 
-\begin{eqnarray}
-\chi_+(p)\alt{\bf [}2|{\bf p}|(|{\bf p}|+p_z){\bf ]}^{-1/2}
-\left(
-\begin{array}{c}
-|{\bf p}|+p_z\\
-px+ip_y
-\end{array}\right)\;,
-\\
-\left\{%
- \openone234567890abc123\alpha\beta\gamma\delta1234556\alpha\beta
- \frac{1\sum^{a}_{b}}{A^2}%
-\right\}%
-\label{eq:one}.
-\end{eqnarray}
-Note the open one in Eq.~(\ref{eq:one}).
-
-Not all numbered equations will fit within a narrow column this
-way. The equation number will move down automatically if it cannot fit
-on the same line with a one-line equation:
-\begin{equation}
-\left\{
- ab12345678abc123456abcdef\alpha\beta\gamma\delta1234556\alpha\beta
- \frac{1\sum^{a}_{b}}{A^2}%
-\right\}.
-\end{equation}
-
-When the \verb+\label{#1}+ command is used [cf. input for
-Eq.~(\ref{eq:one})], the equation can be referred to in text without
-knowing the equation number that \TeX\ will assign to it. Just
-use \verb+\ref{#1}+, where \verb+#1+ is the same name that used in
-the \verb+\label{#1}+ command.
-
-Unnumbered single-line equations can be typeset
-using the \verb+\[+, \verb+\]+ format:
-\[g^+g^+ \rightarrow g^+g^+g^+g^+ \dots ~,~~q^+q^+\rightarrow
-q^+g^+g^+ \dots ~. \]
-
-\subsection{Multiline equations}
-
-Multiline equations are obtained by using the \verb+eqnarray+
-environment.  Use the \verb+\nonumber+ command at the end of each line
-to avoid assigning a number:
-\begin{eqnarray}
-{\cal M}=&&ig_Z^2(4E_1E_2)^{1/2}(l_i^2)^{-1}
-\delta_{\sigma_1,-\sigma_2}
-(g_{\sigma_2}^e)^2\chi_{-\sigma_2}(p_2)\nonumber\\
-&&\times
-[\epsilon_jl_i\epsilon_i]_{\sigma_1}\chi_{\sigma_1}(p_1),
-\end{eqnarray}
-\begin{eqnarray}
-\sum \vert M^{\text{viol}}_g \vert ^2&=&g^{2n-4}_S(Q^2)~N^{n-2}
-        (N^2-1)\nonumber \\
- & &\times \left( \sum_{i<j}\right)
-  \sum_{\text{perm}}
- \frac{1}{S_{12}}
- \frac{1}{S_{12}}
- \sum_\tau c^f_\tau~.
-\end{eqnarray}
-\textbf{Note:} Do not use \verb+\label{#1}+ on a line of a multiline
-equation if \verb+\nonumber+ is also used on that line. Incorrect
-cross-referencing will result. Notice the use \verb+\text{#1}+ for
-using a Roman font within a math environment.
-
-To set a multiline equation without \emph{any} equation
-numbers, use the \verb+\begin{eqnarray*}+,
-\verb+\end{eqnarray*}+ format:
-\begin{eqnarray*}
-\sum \vert M^{\text{viol}}_g \vert ^2&=&g^{2n-4}_S(Q^2)~N^{n-2}
-        (N^2-1)\\
- & &\times \left( \sum_{i<j}\right)
- \left(
-  \sum_{\text{perm}}\frac{1}{S_{12}S_{23}S_{n1}}
- \right)
- \frac{1}{S_{12}}~.
-\end{eqnarray*}
-To obtain numbers not normally produced by the automatic numbering,
-use the \verb+\tag{#1}+ command, where \verb+#1+ is the desired
-equation number. For example, to get an equation number of
-(\ref{eq:mynum}),
-\begin{equation}
-g^+g^+ \rightarrow g^+g^+g^+g^+ \dots ~,~~q^+q^+\rightarrow
-q^+g^+g^+ \dots ~. \tag{2.6$'$}\label{eq:mynum}
-\end{equation}
-
-A few notes on \verb=\tag{#1}=. \verb+\tag{#1}+ requires
-\texttt{amsmath}. The \verb+\tag{#1}+ must come before the
-\verb+\label{#1}+, if any. The numbering set with \verb+\tag{#1}+ is
-\textit{transparent} to the automatic numbering in REV\TeX{};
-therefore, the number must be known ahead of time, and it must be
-manually adjusted if other equations are added. \verb+\tag{#1}+ works
-with both single-line and multiline equations. \verb+\tag{#1}+ should
-only be used in exceptional case - do not use it to number all
-equations in a paper.
-
-Enclosing single-line and multiline equations in
-\verb+\begin{subequations}+ and \verb+\end{subequations}+ will produce
-a set of equations that are ``numbered'' with letters, as shown in
-Eqs.~(\ref{subeq:1}) and (\ref{subeq:2}) below:
-\begin{subequations}
-\label{eq:whole}
-\begin{equation}
-\left\{
- abc123456abcdef\alpha\beta\gamma\delta1234556\alpha\beta
- \frac{1\sum^{a}_{b}}{A^2}
-\right\},\label{subeq:1}
-\end{equation}
-\begin{eqnarray}
-{\cal M}=&&ig_Z^2(4E_1E_2)^{1/2}(l_i^2)^{-1}
-(g_{\sigma_2}^e)^2\chi_{-\sigma_2}(p_2)\nonumber\\
-&&\times
-[\epsilon_i]_{\sigma_1}\chi_{\sigma_1}(p_1).\label{subeq:2}
-\end{eqnarray}
-\end{subequations}
-Putting a \verb+\label{#1}+ command right after the
-\verb+\begin{subequations}+, allows one to
-reference all the equations in a subequations environment. For
-example, the equations in the preceding subequations environment were
-Eqs.~(\ref{eq:whole}).
-
-\subsubsection{Wide equations}
-The equation that follows is set in a wide format, i.e., it spans
-across the full page. The wide format is reserved for long equations
-that cannot be easily broken into four lines or less:
-\begin{widetext}
-\begin{equation}
-{\cal R}^{(\text{d})}=
- g_{\sigma_2}^e
- \left(
-   \frac{[\Gamma^Z(3,21)]_{\sigma_1}}{Q_{12}^2-M_W^2}
-  +\frac{[\Gamma^Z(13,2)]_{\sigma_1}}{Q_{13}^2-M_W^2}
- \right)
- + x_WQ_e
- \left(
-   \frac{[\Gamma^\gamma(3,21)]_{\sigma_1}}{Q_{12}^2-M_W^2}
-  +\frac{[\Gamma^\gamma(13,2)]_{\sigma_1}}{Q_{13}^2-M_W^2}
- \right)\;. \label{eq:wideeq}
-\end{equation}
-\end{widetext}
-This is typed to show the output is in wide format.
-(Since there is no input line between \verb+\equation+ and
-this paragraph, there is no paragraph indent for this paragraph.)
-
 \end{document}
-%
-% ****** End of file aipsamp.tex ******

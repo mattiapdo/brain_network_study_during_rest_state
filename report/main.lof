@@ -1,0 +1,12 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces Topographical representation of directed connectivity network for \textbf {open eyes} with density d = 0.05 (top view, nose down)}}{7}{}
+\contentsline {figure}{\numberline {2}{\ignorespaces Topographical representation of directed connectivity network for \textbf {closed eyes} with density d = 0.05 (top view, nose down)}}{8}{}
+\contentsline {figure}{\numberline {3}{\ignorespaces didascalia breve}}{9}{}
+\contentsline {figure}{\numberline {4}{\ignorespaces With increasing density, we shall see that the global clustering coefficient is positively related to the density of the graph. This is expected, since the clustering coefficient is a measure of the the degree to which nodes in the graph generally tend to cluster together: when the density increases the average degree of the graph increases and as a result, it is more likely that neighbours of any given node are neighbours with each other.\\ At the same time, the more dense is a network, the more likely it is to find a shorter path that connects any two given nodes, and this gives the intuition why to higher densities correspond lower average shortest paths.}}{10}{}
+\contentsline {figure}{\numberline {5}{\ignorespaces Dictionary of the patterns that appear as motifs or anti-motifs in our case studies}}{11}{}
+\contentsline {figure}{\numberline {6}{\ignorespaces Topographical representation of EO case for the motif with id = 36}}{12}{}
+\contentsline {figure}{\numberline {7}{\ignorespaces Topographical representation of EC case for the motif with id = 36}}{13}{}
+\contentsline {figure}{\numberline {8}{\ignorespaces Motifs which involve the channel Po3 }}{14}{}
+\contentsline {figure}{\numberline {9}{\ignorespaces EO case - Louvain method - Modularity based approach}}{15}{}
+\contentsline {figure}{\numberline {10}{\ignorespaces EC case - Louvain method - Modularity based approach}}{16}{}
+\contentsline {figure}{\numberline {11}{\ignorespaces EO case - Infomap method - Information theory based approach}}{17}{}
+\contentsline {figure}{\numberline {12}{\ignorespaces EC case - Infomap method - Information theory based approach}}{18}{}
